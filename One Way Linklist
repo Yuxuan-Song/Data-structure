@@ -1,0 +1,210 @@
+/*******
+链表：用指针将n个结点连接起来。
+      三个指针：head,node,end。
+	  head为头节点，表示链表起始位置； 
+	  node为信息结点，存放信息； 
+	  end为尾结点，用于"索引"。
+	  首先创建end=head=(linklist *)malloc(sizeof(linklist))；
+	  接下来开辟新结点node=(linklist *)malloc(sizeof(linklist))来存放结点信息
+	  并用end作为索引将一个个结点连接进链表中。 
+*******/
+#include <stdio.h>
+#include <stdlib.h>
+
+struct data{
+	int data;
+	int record;
+	struct data *next;
+};
+
+struct data *h;
+int n;
+
+struct data *create()
+{
+	int i,j;
+	struct data *node,*end;
+	h=(struct data *)malloc(sizeof(struct data));
+	end=h;
+	n=0;
+	printf("Please input the data:\n");
+	scanf("%d",&i);
+	printf("Please input the record:\n");
+	scanf("%d",&j);
+	while(i != 0)           //用循环来实现一个个结点信息的输入，直到所有信息输完为止 
+	{
+		n++;
+		node=(struct data *)malloc(sizeof(struct data));
+		node->data=i;
+		node->record=j;
+		end->next=node;
+		end=node;
+		printf("Please input the data:\n");
+		scanf("%d",&i);
+		printf("Please input the record:\n");
+		scanf("%d",&j);
+	}
+	end->next=NULL;     //全部输入完成时，利用end将尾结点指向的下一为止置为NULL 
+	
+	return h;     //返回head以便后续操作（从链表头部开始）
+}
+struct data *delate(struct data *head)
+{
+	int i;
+	struct data *node,*end;
+	printf("Please input the data to be delate:\n");
+	scanf("%d",&i);
+	if(head->next == 0)
+	{
+		printf("It's NULL!\n");
+		return 0;
+	}
+	end=node=head->next;
+	if(i == node->data)
+	{
+		head->next=node->next;
+	}
+	else
+	{
+		while((i != node->data) && (node->next != 0))
+		{
+			end=node;
+			node=node->next;
+		}
+		if((i != node->data) && (node->next == 0))
+		{
+			printf("This data is not exist!\n");
+			return head;
+		}
+		else
+		{
+			if(node->next == 0)
+			{
+				end->next=NULL;
+			}
+			else
+			{
+				end->next=node->next;
+			}
+		}
+	}
+	if(head->next == NULL)
+	{
+		printf("It'a a null list now~\n");
+	}
+	else
+	{
+		printf("The new-linke-delated records are:\n");
+	}
+	
+	return head;
+}
+struct data *insert(struct data *head)
+{
+	struct data *node,*end,*p;
+	p=(struct data *)malloc(sizeof(struct data));
+	printf("Please input the insert data:\n");
+	scanf("%d",&p->data);
+	printf("Please input the insert record:\n");
+	scanf("%d",&p->record);
+	if(head->next == NULL)
+	{
+		head->next=p;
+		p->next=NULL;
+	}
+	else
+	{
+		end=head->next;
+		if(end->data >= p->data)
+		{
+			head->next=p;
+			p->next=end;
+		}
+		else
+		{
+			while((p->data >= end->data) && (end->next != 0))
+			{
+				node=end;
+				end=end->next;
+			}
+			if((p->data >= end->data) && (end->next == 0))
+			{
+				end->next=p;
+				p->next=NULL;
+			}
+			else
+			{
+				node->next=p;
+				p->next=end;
+			}
+		}
+	}
+	
+	return head;	
+}
+struct data *change(struct data *head)
+{
+	int i,j;
+	struct data *p;
+	printf("Please input the data to change:\n");
+	scanf("%d",&i);
+	printf("Please input the record of this data to change:\n");
+	scanf("%d",&j);
+	p=head->next;
+	while((p->next != 0) && (i != p->data))
+	{
+		p=p->next;
+	}
+	if(p->next == 0)
+	{
+		printf("This data is not exist!\n");
+	}
+	else
+	{
+		p->record=j;
+		printf("The new record is:\ndata%d=%d",p->data,p->record);
+	}
+	
+	return head;
+}
+
+void print(struct data *head)   //打印链表时，从head开始，定义一个指针p作为索引 
+{
+	struct data *p;
+	p=head;
+	while(p->next != 0)
+	{
+		p=p->next;
+		printf("data%d=%d\n",p->data,p->record);
+	}
+	/***
+	p=head->next
+	while(p)
+	{
+		printf("data%d=%d\n",p->data,p->record);
+		p=p->next;
+	}
+	***/ 
+}
+int main()
+{
+	struct data *cre,*del,*ins,*cha;
+	cre=create();
+	if(h->next != NULL)
+	{
+		printf("There are %d records:\n",n);
+		print(cre);
+		del=delate(cre);
+		print(del);
+		ins=insert(del);
+		print(ins);
+		cha=change(ins);
+	}
+	else
+	{
+		printf("This is a NULL LinkList!\n");
+	}
+	
+	
+	return 0;
+}
