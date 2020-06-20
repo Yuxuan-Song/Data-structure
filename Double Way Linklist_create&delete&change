@@ -1,0 +1,210 @@
+/*******
+链表：用指针将n个结点连接起来。
+      三个指针：head,node,end。
+	  head为头节点，表示链表起始位置； 
+	  node为信息结点，存放信息； 
+	  end为尾结点，用于"索引"。
+	  首先创建end=head=(linklist *)malloc(sizeof(linklist))；
+	  接下来开辟新结点node=(linklist *)malloc(sizeof(linklist))来存放结点信息
+	  并用end作为索引将一个个结点连接进链表中。 
+*******/
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct link
+{
+	int data;
+	struct link *next;
+	struct link *prior;
+}LinkList;
+
+LinkList *h;
+
+LinkList *locate(LinkList *head,int e)
+{
+	LinkList *p;
+	p=head->next;
+	while(p->data < e  &&  p->next != 0)
+	{
+		p=p->next;
+	}
+	
+	return p;
+}
+LinkList *change(LinkList *head)
+{
+	int e;
+	LinkList *p;
+	printf("Please input the number to change:\n");
+	scanf("%d",&e);
+	p=locate(head,e);
+	while(p->data != e)
+	{
+		printf("The number is not exist,please input again:\n");
+		scanf("%d",&e);
+		p=locate(head,e);
+	}
+	printf("Please input the new number:\n");
+	scanf("%d",&p->data);
+	
+	return head;
+}
+LinkList *delete_1(LinkList *head)
+{
+	int e;
+	LinkList *p;
+	printf("Please input the number to delete:\n");
+	scanf("%d",&e);
+	p=locate(head,e);
+	while(p->data != e)
+	{
+		printf("The number is not exist,please input again:\n");
+		scanf("%d",&e);
+		p=locate(head,e);
+	}
+	if(p == head->next  &&  p->next == NULL)
+	{
+		head->next=NULL;
+	}
+	else
+	{
+		if(p == head->next)
+		{
+			head->next=p->next;
+			p->next->prior=head;
+		}
+		else if(p->next == NULL)
+		{
+			p->prior->next=NULL;
+		}
+		else
+		
+		{
+			p->prior->next=p->next;
+			p->next->prior=p->prior;
+		}
+	}
+	
+	return head;
+}
+LinkList *insert(LinkList *head)
+{
+	int e;
+	LinkList *p,*q;                                           //因要插入新结点，故引入新指针q作为新结点，而p指针与之前删改一样，仍作为索引。 
+	q=(LinkList *)malloc(sizeof(LinkList));
+	printf("Please input the number to insert:\n");
+	scanf("%d",&e);
+	q->data=e;
+	if(head->next != NULL)                                       //链表不为空 
+	{
+		p=locate(head,e);
+		while(p->data == e)                                      //e值已存在 ，重输，到不存在为止 
+		{
+			printf("The number has been inside,please input again:\n");
+			scanf("%d",&e);
+			p=locate(head,e);
+		}
+		if(q->data < p->data)                                      //插入值比位置值小，即不在表尾插入 
+		{
+			if(p == head->next)                          //插入在表头 
+			{
+				head->next=q;
+				q->prior=head;
+				q->next=p;
+				p->prior=q;
+			}
+			else                                       //插入在表中（正常插入） 
+			{
+				p->prior->next=q;
+				q->prior=p->prior;
+				q->next=p;
+				p->prior=q;
+			}
+		}
+		else                                                   //插入值为表中最大值，即在表尾插入 
+		{
+			p->next=q;
+			q->prior=p;
+			q->next=NULL;
+		}
+	}
+	else                                                     //链表为空
+	{
+		q->data=e;
+		head->next=q;
+		q->prior=head;
+		q->next=NULL;
+	}
+	
+	return head;
+}
+
+LinkList *create()
+{
+	int i,n=1;
+	LinkList *node,*end;
+	end=h=(LinkList *)malloc(sizeof(LinkList));
+	end->next=NULL;     //首先将头指针所指向的下一位置 置为NULL
+	printf("Please intput the %d number:\n",n);
+	scanf("%d",&i);
+	while(i != 0)
+	{
+		n++;
+		node=(LinkList *)malloc(sizeof(LinkList));
+		node->data=i;
+		if(end == h)
+		{
+			h->next=node;
+			node->prior=h;
+			end=node;
+		}
+		else
+		{
+			end->next=node;
+			node->prior=end;
+			end=node;
+		}
+		printf("Please intput the %d number:\n",n);
+		scanf("%d",&i);
+	}
+	end->next=NULL;
+	
+	return h;
+}
+void print(LinkList *head)
+{
+	int m=0;
+	LinkList *p;
+	p=head;
+	if(p->next == NULL)
+	{
+		printf("This linklist is NULL now!\n");
+	}
+	while(p->next != 0)
+	{
+		m++;
+		p=p->next;
+		printf("The %d number is %d\n",m,p->data);
+	}
+}
+int main()
+{
+	LinkList *cre,*gai,*del,*zeng;
+	cre=create();
+	if(h->next != NULL)
+	{
+		print(cre);
+		gai=change(cre);
+		print(gai);
+		del=delete_1(gai);
+		print(del);
+		zeng=insert(del);
+		print(zeng);
+	}
+	else
+	{
+		printf("This linklist is NULL!\n");
+	}
+	
+	return 0;
+}
