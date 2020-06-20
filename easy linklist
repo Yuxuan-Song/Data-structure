@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node{
+	int data;
+	struct Node *next;
+}Linklist;
+
+
+Linklist *create()
+{
+	Linklist *head,*node,*end;
+	int i,n = 1;
+	end = head = (Linklist *)malloc(sizeof(Linklist));
+	end->next = NULL;
+	printf("Please input the %d data:\n",n);
+	scanf("%d",&i);
+	while(i != 0)
+	{
+		n++;
+		node = (Linklist *)malloc(sizeof(Linklist));
+		node->data = i;
+		end->next = node;
+		end = node;
+		printf("Please input the data:\n");
+		scanf("%d",&i);
+	}
+	end->next = NULL;
+	
+	return head;
+}
+
+void print(Linklist *h)
+{
+	Linklist *p;
+	int i = 0;
+	p = h;
+	while(p->next != NULL)
+	{
+		i++;
+		p = p->next;
+		printf("The %d data is: %d\n",i,p->data);
+	}
+}
+
+int main()
+{
+	Linklist *cre;
+	cre = create();
+	print(cre);
+}
