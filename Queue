@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node
+{
+	int data;
+	struct node *next;
+}Node;
+typedef struct queue
+{
+	struct node *head,*rear;
+}Queue;
+
+Queue *Create(Queue *q)
+{
+	q->head=q->rear=(Node *)malloc(sizeof(Node));
+	if(! q->head)
+	{
+		printf("创建失败！\n");
+		return 0;
+	}
+	q->rear->next=NULL;
+	printf("创建成功！\n");
+	
+	return q;
+}
+
+int insertQueue(Queue *q,int e)
+{
+	Node *p;
+	p=(Node *)malloc(sizeof(Node));
+	p->data=e;
+	p->next=NULL;
+	q->rear->next=p;
+	q->rear=p;
+	
+	return 0;
+}
+
+int outputQueue(Queue *q,int e)
+{
+	Node *p;
+	if(q->head == q->rear)
+	{
+		printf("The queue is empty now!\n");
+		return 0;
+	}
+	p=q->head->next;
+	e=p->data;
+	q->head->next=p->next;
+	if(p->next == q->rear)
+	{
+		q->rear=q->head;
+	}
+	free(p);
+	
+	return e;
+}
+
+DestoryQueue(Queue *q)
+{
+	
+}
+int main()
+{
+	int i,n,e;
+	Queue *q;
+	printf("创建队列：\n");
+	Create(q);
+	printf("创建完成！\n\n");
+	
+	printf("Please input the length of the queue:\n");
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++)
+	{
+		printf("Please input the %d number:\n",i+1);
+		scanf("%d",&e);
+		insertQueue(q,e);
+	}
+	for(i=0;i<n;i++)
+	{
+		printf("The %d number is",i+1);
+		e=outputQueue(q,e);
+		printf("%d\n",e);
+	}
+	DestoryQueue(q);
+	
+	return 0;
+}
