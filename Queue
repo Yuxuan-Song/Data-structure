@@ -5,86 +5,175 @@ typedef struct node
 {
 	int data;
 	struct node *next;
-}Node;
+}Qnode;                     //队列中，是由结点构成的。结点结构为 一个本节点所存放的数据和指向下一节点的指针 
 typedef struct queue
 {
-	struct node *head,*rear;
-}Queue;
+	Qnode *front,*rear;
+}Queuelink;               //队列结构：俩只指针（一前一后） 
 
-Queue *Create(Queue *q)
+int initQueue(Queuelink *q)        //初始化队列是对Queuelink *q，队列结构，进行初始化 
 {
-	q->head=q->rear=(Node *)malloc(sizeof(Node));
-	if(! q->head)
+	q->front=(Qnode *)malloc(sizeof(Qnode));   //【注意：就是q->front的用法导致main函数中必须定义为非指针，并在调用时用&q形式才能保证程序正常运行】 
+	if(!q->front)          //如果头指针为空，则创建失败。 
 	{
-		printf("创建失败！\n");
+		printf("创建失败!\n");
 		return 0;
 	}
-	q->rear->next=NULL;
-	printf("创建成功！\n");
-	
-	return q;
+	q->front->next=NULL;
+	q->rear=q->front;
+	printf("创建完成!\n");
 }
-
-int insertQueue(Queue *q,int e)
+int insertQueue(Queuelink *q,int e)     //入队列操作。以尾结点rear作为索引，始终指向新插入的结点（新插入节点的next指针始终置为NULL，因插在队列尾部） 
 {
-	Node *p;
-	p=(Node *)malloc(sizeof(Node));
+	Qnode *p;
+	p=(Qnode *)malloc(sizeof(Qnode));
 	p->data=e;
 	p->next=NULL;
 	q->rear->next=p;
 	q->rear=p;
-	
-	return 0;
 }
-
-int outputQueue(Queue *q,int e)
+int outputQueue(Queuelink *q)
 {
-	Node *p;
-	if(q->head == q->rear)
+	Qnode *p;
+	int e;
+	if(q->front == q->rear)
 	{
-		printf("The queue is empty now!\n");
+		printf("The queue is NULL!\n");
 		return 0;
 	}
-	p=q->head->next;
+	p=q->front->next;
 	e=p->data;
-	q->head->next=p->next;
-	if(p->next == q->rear)
+	q->front->next=p->next;
+	if(p->next == NULL)
 	{
-		q->rear=q->head;
+		q->rear=q->front;
 	}
-	free(p);
 	
 	return e;
 }
-
-DestoryQueue(Queue *q)
+int DestoryQueue(Queuelink *q)
 {
-	
+	while(q->front)
+	{
+		q->rear=q->front->next;
+		free(q->front);
+		q->front=q->rear;
+	}
+	printf("释放完成！\n\n");
 }
 int main()
 {
-	int i,n,e;
-	Queue *q;
-	printf("创建队列：\n");
-	Create(q);
-	printf("创建完成！\n\n");
-	
+	int n,i,e;
+	Queuelink q;             //【注意：此处定义Queuelink时必须为非指针形式，之后调用时使用&q。若直接定义为*q，则创建队列时程序不运行】 
+	printf("创建队列:\n");
+	initQueue(&q);             //【与定义的Queuelink q和函数中Queuelink *q保持一致，调用函数时取&q】 
+	printf("\n\n");
 	printf("Please input the length of the queue:\n");
 	scanf("%d",&n);
-	
 	for(i=0;i<n;i++)
 	{
 		printf("Please input the %d number:\n",i+1);
 		scanf("%d",&e);
-		insertQueue(q,e);
+		insertQueue(&q,e);
+	}
+	printf("\n");
+	for(i=0;i<n;i++)
+	{
+		printf("The %d number is:",i+1);
+		e=outputQueue(&q);
+		printf("%d\n",e);
+	}
+	printf("\n释放队列：\n"); 
+	DestoryQueue(&q);
+	
+	printf("\n");
+	printf("Finished!\n");
+	return 0;
+}
+
+/*********************
+//另一种方式：出队列完成的同时直接销毁队列 
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+	int data;
+	struct Node *next;
+}QNode;
+typedef struct Que
+{
+	QNode *head,*rear;
+}Queue;
+
+int initQueue(Queue *Q)
+{
+	Q->head=(QNode *)malloc(sizeof(QNode));
+	if(Q->head != NULL)
+	{
+		Q->rear=Q->head;
+		Q->head->next=NULL;
+	}
+}
+int EnterQueue(Queue *Q,int e)
+{
+	QNode *q;
+	q=(QNode *)malloc(sizeof(QNode));
+	if(q)
+	{
+		q->data=e;
+		q->next=NULL;
+		Q->rear->next=q;
+		Q->rear=q;
+		return 1;
+	}
+	else
+		return 0;
+}
+int OutQueue(Queue *Q)
+{
+	int e;
+	QNode *q;
+	if(Q->rear == Q->head)
+	{
+		printf("The queue is empty!\n");
+		return 0;
+	}
+	q=(QNode *)malloc(sizeof(QNode));
+	q=Q->head->next;
+	e=q->data;
+	Q->head->next=q->next;
+	if(q == Q->rear)
+	{
+		Q->rear=Q->head;
+	}
+	free(q);
+	
+	return e;
+}
+
+int main()
+{
+	int n,i,e;
+	Queue q;
+	printf("创建队列:\n");
+	initQueue(&q);
+	printf("\n\n");
+	printf("Please input the length of the queue:\n");
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+		printf("Please input the %d number:\n",i+1);
+		scanf("%d",&e);
+		EnterQueue(&q,e);
 	}
 	for(i=0;i<n;i++)
 	{
-		printf("The %d number is",i+1);
-		e=outputQueue(q,e);
+		printf("The %d number is:\n",i+1);
+		e=OutQueue(&q);
 		printf("%d\n",e);
 	}
-	DestoryQueue(q);
 	
 	return 0;
 }
+**********************/
