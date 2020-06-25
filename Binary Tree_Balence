@@ -1,0 +1,194 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define LH 1
+#define EH 0
+#define RH -1
+#define TRUE 1
+#define FALSE -1
+
+typedef int status;
+typedef struct tree
+{
+	int data;
+	int bf;
+	struct tree *lchild,*rchild;
+}BITnode,*BITree;
+
+int L_Roate(BITree *P)
+{
+	BITree R;
+	R=(*P)->rchild; //初始化 
+	//重新赋值（旋转后的值） 
+	(*P)->rchild=R->lchild;
+	R->lchild=*P;
+	
+	*P=R;     //使P指向新的根结点   ？？ 
+}
+int R_Roate(BITree *P)
+{
+	BITree L;
+	L=(*P)->lchild; //初始化 
+	//重新赋值（旋转后的值） 
+	(*P)->lchild=L->rchild;
+	L->rchild=*P;
+	
+	*P=L;     //使P指向新的根结点   ？？ 
+}
+
+int LeftBalence(BITree *T)    //左平衡 两种状况：LL型-右旋一次；LR型-左旋再右旋
+{
+	BITree L,Lr;
+	L=(*T)->lchild;
+	switch(L->bf)           //判断T->child(L)的平衡因子 [注意：在平衡旋转之前，先将平衡因子至为旋转后应该的样子]
+	{
+		case LH: //LL型 
+			(*T)->bf=L->bf=EH;
+			R_Roate(T);
+			break;
+		case RH:  //LR型 
+			Lr=L->rchild;    //Lr指向L的右子树
+			switch(Lr->bf)     //判断Lr的平衡因子 分情况讨论其子节点旋转状况（即判断不同情况下旋转后的平衡因子）
+			{
+				case LH:
+					(*T)->bf=RH;
+					L->bf=EH;
+					break;
+				case EH:
+					(*T)->bf=L->bf=EH;
+					break;
+				case RH:
+					(*T)->bf=EH;
+					L->bf=LH;
+					break;
+			}
+			Lr->bf=EH;
+			L_Roate(&(*T)->lchild);
+			R_Roate(T);
+	}
+}
+int RightBalence(BITree *T)        //右平衡 两种状况：RR型-左旋一次；RL型-右旋再左旋  与左平衡同理 
+{
+	BITree R,Rl;
+	R=(*T)->rchild;
+	switch(R->bf)
+	{
+		case RH:
+			(*T)->bf=EH;
+			R->bf=EH;
+			L_Roate(T);
+			break;
+		case LH:
+			Rl=R->lchild;
+			switch(Rl->bf)
+			{
+				case RH:
+					(*T)->bf=LH;
+					R->bf=EH;
+					break;
+				case EH:
+					(*T)->bf=R->bf=EH;
+					break;
+				case LH:
+					(*T)->bf=EH;
+					R->bf=RH;
+					break;
+			}
+			Rl->bf=EH;
+			R_Roate(&(*T)->rchild);
+			L_Roate(T);
+	}
+}
+
+int insertALV(BITree *T,int e,status *taller)
+{
+	if(!(*T))                //建立新结点并插入 
+	{
+		(*T)=(BITree)malloc(sizeof(BITnode));
+		(*T)->data=e;
+		(*T)->lchild=(*T)->rchild=NULL;
+		(*T)->bf=EH;
+		*taller=TRUE;
+	}
+	else                //存在该节点 进行插入从方向的判断 
+	{
+		if(e == (*T)->data)     //值已存在，树不长高，结束 
+		{
+			*taller=FALSE;
+			return FALSE;
+		}
+		if(e < (*T)->data)       //插入值小于根（父）节点，插入左孩子 
+		{
+			if(!(insertALV(&(*T)->lchild,e,taller)))
+			{
+				return FALSE;
+			}
+			if(*taller)
+			{
+				switch((*T)->bf)       //检查T的平衡因子 判断旋转类型分类讨论
+				{
+					case LH:    //左子树高 即再插入旋转时进行左平衡操作 [注意：此时不改变平衡因子 因后续平衡旋转操作中有对平衡因子的改变]
+						LeftBalence(T);
+						*taller=FALSE;     //平衡之后，高度为零
+						break;
+					case EH:     //等高 暂时平衡 插入后调整平衡因子
+						(*T)->bf=LH;
+						*taller=TRUE;
+						break;
+					case RH:     //右高 插入后得到平衡树
+						(*T)->bf=EH;
+						*taller=FALSE; 
+						break;
+				}
+			}
+		}
+		else                  //插入值大于根（父）节点，插入右孩子  基本思想与上述if相同 
+		{
+			if(!(insertALV(&(*T)->rchild,e,taller)))
+			{
+				return FALSE;
+			}
+			if(*taller)
+			{
+				switch((*T)->bf)
+				{
+					case LH:
+						(*T)->bf=EH;
+						*taller=FALSE;
+						break;
+					case EH:
+						(*T)->bf=RH;
+						*taller=TRUE;
+						break;
+					case RH:
+						RightBalence(T);
+						*taller=FALSE;
+						break;
+				}
+			}
+		}
+	}
+	return TRUE;             //？？？为什么 
+}
+
+int previsit(BITree *T)
+{
+	if(T)
+	{
+		printf("%d",(*T)->data);
+		previsit(&(*T)->lchild);
+		previsit(&(*T)->rchild);
+	}
+}
+
+int main()
+{
+	int i;
+	int a[10]={3,2,1,4,5,6,7,10,9,8}; 
+	BITree T=NULL;
+	status taller;
+	for(i=0;i<10;i++)
+	{
+		insertALV(&T,a[i],&taller);
+	}
+	previsit(&T);
+}
