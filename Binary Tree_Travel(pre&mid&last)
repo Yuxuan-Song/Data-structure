@@ -1,0 +1,162 @@
+/*******************
+在树结构中，主要就是递归思想 。
+同时也要注意指针的用法（关于*T,&T,&(T)我还有些混乱）。
+此外还需注意： 
+输入的时候要一次性输入“AB##C##”
+不能输入一个‘A’然后就按回车
+这样下一次读取的字符就是换行符’\n’。
+********************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef char ElemType;
+typedef struct node
+{
+	ElemType data;
+	struct node *lchild,*rchild;
+}BITnode,*BITree;
+
+int initCreatTree(BITree *T)
+{
+	ElemType ch;
+	scanf("%c",&ch);
+	if(ch != '#')
+	{
+		*T=(BITree)malloc(sizeof(BITnode));
+		(*T)->data=ch;
+		initCreatTree(&(*T)->lchild);
+		initCreatTree(&(*T)->rchild);
+	}
+	else
+	{
+		*T=NULL;
+	}
+}
+PreOrder(BITree T,int level)
+{
+	if(T)
+	{
+		printf("The %c node is in %d level\n",T->data,level);
+		PreOrder(T->lchild,++level);
+		PreOrder(T->rchild,level++);
+	}
+	
+}
+MidOrder(BITree T)
+{
+	if(T)
+	{
+		MidOrder(T->lchild);
+		printf("%c\n",T->data);
+		MidOrder(T->rchild);
+	}
+}
+LastOrder(BITree T)
+{
+	if(T)
+	{
+		LastOrder(T->lchild);
+		LastOrder(T->rchild);
+		printf("%c\n",T->data);
+	}
+}
+
+int main()
+{
+	BITree T;
+	int level=1;
+	printf("创建树：\n");
+	printf("请安前序方式输入树的值：\n");
+	initCreatTree(&T);
+	printf("OK!\nThe result is:\n");
+	printf("PreOrder:\n");
+	PreOrder(T,level);
+	printf("MidOrder:\n");
+	MidOrder(T);
+	printf("LastOrder:\n");
+	LastOrder(T);
+	
+	return 0;
+}
+
+
+/***********************
+另一种写法（变换主要在指针用法上）： 
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Tree{
+	char val;
+	struct Tree *lchild;
+	struct Tree *rchild;
+}	BITNode,*BITree;
+
+int CreateTree(BITree &T)
+{
+	char i;
+	scanf("%c",&i);
+	if(i == '#')
+	{
+		T = NULL;
+	}
+	else
+	{
+		T = (BITree)malloc(sizeof(BITNode));
+		T->val = i;
+		CreateTree(T->lchild);
+		CreateTree(T->rchild);
+	}
+}
+
+PreOrder(BITree &T)
+{
+	if(T != NULL)
+	{
+		printf("%c",T->val);
+		PreOrder(T->lchild);
+		PreOrder(T->rchild);
+	}
+}
+
+MidOrder(BITree &T)
+{
+	if(T != NULL)
+	{
+		
+		MidOrder(T->lchild);
+		printf("%c",T->val);
+		MidOrder(T->rchild);
+	}
+}
+
+LastOrder(BITree &T)
+{
+	if(T != NULL)
+	{
+		LastOrder(T->lchild);
+		LastOrder(T->rchild);
+		printf("%c",T->val);
+	}
+}
+
+int main()
+{
+	BITree root;
+	printf("请按前序遍历方式输入:\n");
+	CreateTree(root);
+	printf("\n\n");
+	
+	printf("前序遍历输出:\n");
+	PreOrder(root);
+	printf("\n\n");
+
+	printf("中序遍历输出:\n");
+	MidOrder(root);
+	printf("\n\n");
+
+	printf("后序遍历输出:\n");
+	LastOrder(root); 
+	printf("\n\n");
+}
+***********************/
