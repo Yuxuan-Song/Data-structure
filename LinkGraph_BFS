@@ -1,0 +1,199 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 100
+
+typedef struct EdgeNode
+{
+	int adj;
+	EdgeNode *next;
+}EdgeNode;
+typedef struct Ver
+{
+	char name;
+	EdgeNode *first;
+}Vertex,vertex[MAXN];
+typedef struct Graph
+{
+	int numV,numE;
+	vertex ver;
+}LineGraph;
+
+typedef struct Node
+{
+	int data;
+	struct Node *next;
+}QNode;
+typedef struct Que
+{
+	QNode *head,*rear;
+}Queue;
+
+bool visit[MAXN];
+
+int locate(LineGraph *G,char v)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		if(v == G->ver[i].name)
+		{
+			return i;
+		}
+	}
+}
+
+int Create(LineGraph *G)
+{
+	int i,j,k;
+	char v1,v2;
+	EdgeNode *p1,*p2;
+	for(i=0;i<G->numV;i++)
+	{
+		printf("Please input the %d vertex_name:\n",i+1);
+		scanf("%c",&G->ver[i].name);
+		getchar();
+		G->ver[i].first=NULL;
+	}
+	for(k=0;k<G->numE;k++)
+	{
+		printf("Please input the %d line,it's vertexs are:v1 v2:\n",k+1);
+		scanf("%c %c",&v1,&v2);
+		getchar();
+		i=locate(G,v1);
+		j=locate(G,v2);
+		
+		p1=(EdgeNode *)malloc(sizeof(EdgeNode));
+		p1->adj=j;
+		p1->next=G->ver[i].first;
+		G->ver[i].first=p1;
+		
+		p2=(EdgeNode *)malloc(sizeof(EdgeNode));
+		p2->adj=i;
+		p2->next=G->ver[j].first;
+		G->ver[j].first=p2;
+		
+	}
+}
+
+int initQueue(Queue *Q)
+{
+	Q->head=(QNode *)malloc(sizeof(QNode));
+	if(Q->head != NULL)
+	{
+		Q->rear=Q->head;
+		Q->head->next=NULL;
+		return 1;
+	}
+}
+int EnterQueue(Queue *Q,int i)
+{
+	QNode *q;
+	q=(QNode *)malloc(sizeof(QNode));
+	if(q)
+	{
+		q->data=i;
+		q->next=NULL;
+		Q->rear->next=q;
+		Q->rear=q;
+		return 1;
+	}
+	else
+		return 0;
+}
+int OutQueue(Queue *Q,int i)
+{
+	QNode *q;
+	if(Q->rear == Q->head)
+	{
+		printf("The queue is empty!\n");
+		return 0;
+	}
+	q=(QNode *)malloc(sizeof(QNode));
+	q=Q->head->next;
+	i=q->data;
+	Q->head->next=q->next;
+	if(q == Q->rear)
+	{
+		Q->rear=Q->head;
+	}
+	free(q);
+}
+int Empety(Queue *Q)
+{
+	if(Q->head == Q->rear)
+	{
+		return 1;
+	}
+}
+
+int BFS(LineGraph *G,int i)
+{
+	int j;
+	Queue Q;
+	EdgeNode *p;
+	printf("%c",G->ver[i].name);
+	visit[i]=true;
+	initQueue(&Q);
+	EnterQueue(&Q,i);
+	while(!Empety(&Q))
+	{
+		OutQueue(&Q,j);
+		p=(EdgeNode *)malloc(sizeof(EdgeNode));
+		p=G->ver[j].first;
+		while(p)
+		{
+			if(!visit[p->adj])
+			{
+				printf("%c",G->ver[p->adj].name);
+				visit[p->adj]=true;
+				EnterQueue(&Q,p->adj);
+			}
+			p=p->next;
+		}
+	}
+}
+int Travel_BFS(LineGraph *G)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		visit[i]=false;
+	}
+	for(i=0;i<G->numV;i++)
+	{
+		if(!visit[i])
+		{
+			BFS(G,i);
+		}
+	}
+	
+}
+
+int main()
+{
+	int i;
+	LineGraph G;
+	EdgeNode *p;
+	printf("Please input the numV numE:\n");
+	scanf("%d %d",&G.numV,&G.numE);
+	getchar();
+	Create(&G);
+	
+	printf("The LinkGraph is:\n");
+	for(i=0;i<G.numV;i++)
+	{
+		printf("The %c is connected with:\n",G.ver[i].name);
+		p=G.ver[i].first;
+		while(p)
+		{
+			printf("%c",G.ver[p->adj].name);
+			p=p->next;
+		}
+		printf("\n");
+	}
+	
+	printf("The BFS resule is:\n");
+	Travel_BFS(&G);
+	
+	return 0;
+}
