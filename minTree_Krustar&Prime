@@ -1,0 +1,280 @@
+//Krustar算法
+#include <stdio.h>
+#define MAXN 100
+#define INFO 1000
+
+typedef struct ed
+{
+	char head,tail;
+	int weight;
+}Edge[MAXN];
+typedef struct Graph
+{
+	char vertex[MAXN];
+	int ars[MAXN][MAXN];
+	int numV,numE;
+	Edge edge;
+}Graph;
+
+int locate(Graph *G,char v)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		if(v == G->vertex[i])
+		{
+			return i;
+		}
+	}
+}
+int Create(Graph *G)
+{
+	int i,j,k,w;
+	char v1,v2;
+	for(i=0;i<G->numV;i++)
+	{
+		printf("Please input %d vertex:\n",i+1);
+		scanf("%c",&G->vertex[i]);
+		getchar();
+	}
+	for(i=0;i<G->numV;i++)
+	{
+		for(j=0;j<G->numV;j++)
+		{
+			G->ars[i][j]=INFO;
+		}
+	}
+	for(k=0;k<G->numE;k++)
+	{
+		printf("Please input %d edge:v1 v2 w\n",k+1);
+		scanf("%c %c %d",&v1,&v2,&w);
+		getchar();
+		i=locate(G,v1);
+		j=locate(G,v2);
+		G->edge[k].head=v1;
+		G->edge[k].tail=v2;
+		G->edge[k].weight=w;
+		G->ars[i][j]=w;
+		G->ars[j][i]=G->ars[i][j];
+	}
+}
+
+int sort(Graph *G)
+{
+	int i,j,t,min;
+	ed temp;
+	for(i=0;i<G->numE;i++)
+	{
+		min=G->edge[i].weight;
+		t=i;
+		for(j=i+1;j<G->numE;j++)
+		{
+			if(min > G->edge[j].weight)
+			{
+				min=G->edge[j].weight;
+				t=j;
+			}
+		}
+		if(t != i)
+		{
+			temp=G->edge[i];
+			G->edge[i]=G->edge[t];
+			G->edge[t]=temp;
+		}
+	}
+	printf("Sorted result:\n");
+	for(i=0;i<G->numE;i++)
+	{
+		printf("The %d edge weight is %d\n",i+1,G->edge[i].weight);
+	}
+}
+int miniTree_K(Graph *G)
+{
+	int i,j,k;
+	int V1,V2,v1,v2;
+	int Vertex[MAXN];
+	sort(G);
+	for(i=0;i<G->numV;i++)
+	{
+		Vertex[i]=i;
+	}
+	for(k=0;k<G->numE;k++)
+	{
+		V1=locate(G,G->edge[k].head);
+		V2=locate(G,G->edge[k].tail);
+		v1=Vertex[V1];
+		v2=Vertex[V2];
+		if(v1 != v2)
+		{
+			printf("%c(%d)-->%c(%d),weight:%d\n",G->edge[k].head,V1,G->edge[k].tail,V2,G->edge[k].weight);
+			for(j=0;j<G->numV;j++)
+			{
+				if(Vertex[j] == v2)
+				{
+					Vertex[j]=v1;
+				}
+			}
+		}
+	}
+}
+
+int Print(Graph *G)
+{
+	int i,j,w;
+	char v1,v2;
+	printf("Please input the top to reserch:\n");
+	scanf("%c %c",&v1,&v2);
+	getchar();
+	i=locate(G,v1);
+	j=locate(G,v2);
+	w=G->ars[i][j];
+	printf("The weight is %d\n",w);
+	printf("Edge information:\n");
+	for(i=0;i<G->numE;i++)
+	{
+		v1=G->edge[i].head;
+		v2=G->edge[i].tail;
+		w=G->edge[i].weight;
+		printf("%dedge:%c %c %d\n",i+1,v1,v2,w);
+	}
+	printf("\n");
+}
+int main()
+{
+	int i,j,k,w;
+	char v1,v2;
+	Graph G;
+	printf("Please input the numV numE:\n");
+	scanf("%d %d",&G.numV,&G.numE);
+	getchar();
+	Create(&G);
+	Print(&G); 
+	
+	printf("miniTree_K result:\n");
+	miniTree_K(&G);
+}
+/*************************
+//Prime算法
+#include <stdio.h>
+#define MAXN 100
+#define INFO 1000
+
+typedef struct Graph
+{
+	char vertex[MAXN];
+	int ars[MAXN][MAXN];
+	int numV,numE;
+}Graph;
+
+int locate(Graph *G,char v)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		if(v == G->vertex[i])
+		{
+			return i;
+		}
+	}
+}
+int Create(Graph *G)
+{
+	int i,j,k,w;
+	char v1,v2;
+	for(i=0;i<G->numV;i++)
+	{
+		printf("Please input %d vertex:\n",i+1);
+		scanf("%c",&G->vertex[i]);
+		getchar();
+	}
+	for(i=0;i<G->numV;i++)
+	{
+		for(j=0;j<G->numV;j++)
+		{
+			G->ars[i][j]=INFO;
+		}
+	}
+	for(k=0;k<G->numE;k++)
+	{
+		printf("Please input %d edge:v1 v2 w\n",k+1);
+		scanf("%c %c %d",&v1,&v2,&w);
+		getchar();
+		i=locate(G,v1);
+		j=locate(G,v2);
+		G->ars[i][j]=w;
+		G->ars[j][i]=G->ars[i][j];
+	}
+}
+
+int miniTree_P(Graph *G)
+{
+	int i,j,t,min;
+	int lowcost[MAXN];
+	int parent[MAXN];
+	bool visit[MAXN];
+	
+	lowcost[0]=0;             //规定从0开始 
+	parent[0]=-1;
+	visit[0]=true;
+	
+	for(i=1;i<G->numV;i++)        //对由0出发的元素进行初始化,故从i=1开始计数 
+	{
+		lowcost[i]=G->ars[0][i];
+		parent[i]=0;
+		visit[i]=false;
+	}
+	
+	for(i=1;i<G->numV;i++)
+	{
+		min=INFO;               //初始化 
+		t=0;                  //t表示被连接到的点。初始值为0，表示由0开始 
+		for(j=1;j<G->numV;j++)     //从第一个点开始，遍历所有未被访问的点
+		{
+			if(min>lowcost[j] && !visit[j])   //找到权值最小且未被访问的点
+			{
+				min=lowcost[j];
+				t=j;          //赋值给t，表示被连接到的点
+			}
+		}
+		printf("%c(%d)-->%c(%d),weight:%d\n",G->vertex[parent[t]],parent[t],G->vertex[t],t,min);      //打印出父节点和被连接的点，以及权值
+		visit[t]=true;
+		
+		for(j=1;j<G->numV;j++)             //由上一个被连接到的点作为起点，遍历所有未被连接的点
+		{
+			if(lowcost[j] > G->ars[t][j] && !visit[j])    //如果到某一点的权值比之前顶点到他的权值小，则更为当前权值  
+			{
+				lowcost[j]=G->ars[t][j];
+				parent[j]=t;
+			}
+		}
+	}
+}
+
+int Print(Graph *G)
+{
+	int i,j,w;
+	char v1,v2;
+	printf("Please input the top to reserch:\n");
+	scanf("%c %c",&v1,&v2);
+	getchar();
+	i=locate(G,v1);
+	j=locate(G,v2);
+	w=G->ars[i][j];
+	printf("The weight is:%d\n",w);
+	printf("\n");
+}
+int main()
+{
+	int i,j,k,w;
+	char v1,v2;
+	Graph G;
+	printf("Please input the numV numE:\n");
+	scanf("%d %d",&G.numV,&G.numE);
+	getchar();
+	Create(&G);
+	Print(&G); 
+	
+	printf("miniTree_P result:\n");
+	miniTree_P(&G);
+}
+*************************/
