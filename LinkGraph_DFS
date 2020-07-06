@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 100
+
+typedef struct EdgeNode
+{
+	int adj;
+	EdgeNode *next;
+}EdgeNode;
+typedef struct Ver
+{
+	char name;
+	EdgeNode *first;
+}Vertex,vertex[MAXN];
+typedef struct Graph
+{
+	int numV,numE;
+	vertex ver;
+}LineGraph;
+
+bool visit[MAXN];
+
+int locate(LineGraph *G,char v)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		if(v == G->ver[i].name)
+		{
+			return i;
+		}
+	}
+}
+
+int Create(LineGraph *G)
+{
+	int i,j,k;
+	char v1,v2;
+	EdgeNode *p1,*p2;
+	for(i=0;i<G->numV;i++)
+	{
+		printf("Please input the %d vertex_name:\n",i+1);
+		scanf("%c",&G->ver[i].name);
+		getchar();
+		G->ver[i].first=NULL;
+	}
+	for(k=0;k<G->numE;k++)
+	{
+		printf("Please input the %d line,it's vertexs are:v1 v2:\n",k+1);
+		scanf("%c %c",&v1,&v2);
+		getchar();
+		i=locate(G,v1);
+		j=locate(G,v2);
+		
+		p1=(EdgeNode *)malloc(sizeof(EdgeNode));
+		p1->adj=j;
+		p1->next=G->ver[i].first;
+		G->ver[i].first=p1;
+		/******* 无向图 
+		p2=(EdgeNode *)malloc(sizeof(EdgeNode));
+		p2->adj=i;
+		p2->next=G->ver[j].first;
+		G->ver[j].first=p2;
+		******/
+	}
+}
+
+int DFS(LineGraph *G,int i)
+{
+	EdgeNode *p;
+	p=G->ver[i].first;
+	printf("%c",G->ver[i].name);
+	visit[i]=true;
+	while(p)
+	{
+		if(!visit[p->adj])
+		{
+			DFS(G,p->adj);
+		}
+		p=p->next;
+	}
+}
+int Travel_DFS(LineGraph *G)
+{
+	int i;
+	for(i=0;i<G->numV;i++)
+	{
+		visit[i]=false;
+	}
+	for(i=0;i<G->numV;i++)
+	{
+		if(!visit[i])
+		{
+			DFS(G,i);
+		}
+	}
+}
+
+int main()
+{
+	int i;
+	LineGraph G;
+	EdgeNode *p;
+	printf("Please input the numV numE:\n");
+	scanf("%d %d",&G.numV,&G.numE);
+	getchar();
+	Create(&G);
+	
+	printf("The LinkGraph is:\n");
+	for(i=0;i<G.numV;i++)
+	{
+		printf("The %c is connected with:\n",G.ver[i].name);
+		p=G.ver[i].first;
+		while(p)
+		{
+			printf("%c",G.ver[p->adj].name);
+			p=p->next;
+		}
+		printf("\n");
+	}
+	
+	printf("The DFS resule is:\n");
+	Travel_DFS(&G);
+	
+	return 0;
+}
