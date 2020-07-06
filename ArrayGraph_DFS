@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 100
+
+typedef struct Graph
+{
+	char vertex[MAXN];
+	int ars[MAXN][MAXN];
+	int numV,numE;
+}ArrayGraph;
+
+int locate(ArrayGraph *G,char v)
+{
+	int i;
+	for(i=0;i < G->numV;i++)
+	{
+		if(v == G->vertex[i])
+		{
+			return i;
+		}
+	}
+}
+
+bool visit[MAXN];
+
+int CreatGraph(ArrayGraph *G)
+{
+	int i,j,k;
+	int w;
+	char v1,v2;
+	printf("Please input the numV numE:\n");
+	scanf("%d %d",&G->numV,&G->numE);
+	getchar();
+	printf("%d %d\n",G->numV,G->numE);
+	
+	for(i=0;i < G->numV;i++)          //输入顶点值 
+	{
+		printf("Please input the %d top:\n",i+1);
+		scanf("%c",&G->vertex[i]);
+		getchar();
+	}
+	
+	for(i=0;i < G->numV;i++)                  //初始化 
+	{
+		for(j=0;j<G->numE;j++)
+		{
+			G->ars[i][j]=0;
+		}
+	}
+	
+	for(k=0;k<G->numE;k++)
+	{
+		printf("Please input top v1 v2 and weight w:\n");
+		scanf("%c %c %d",&v1,&v2,&w);
+		getchar();
+		i=locate(G,v1);
+		j=locate(G,v2);
+		G->ars[i][j]=w;
+		/*******无向图 
+		G->ars[j][i]=G->ars[i][j];
+		******/
+	}
+}
+
+int Print(ArrayGraph *G)
+{
+	int i,j,v1,v2,w;
+	printf("Please input the top to reserch:\n");
+	scanf("%c %c",&v1,&v2);
+	getchar();
+	i=locate(G,v1);
+	j=locate(G,v2);
+	w=G->ars[i][j];
+	printf("The weight is %d\n",w);
+}
+
+
+int DFS(ArrayGraph *G,int i)
+{
+	int j;
+	printf("%c",G->vertex[i]);
+	visit[i]=true;
+	for(j=0;j<G->numV;j++)
+	{
+		if(G->ars[i][j]==1 && visit[j]==false)
+		{
+			DFS(G,j);
+		}
+	}
+}
+int Travel_DFS(ArrayGraph *G)
+{
+	int i;
+	for(i=0;i < G->numV;i++)
+	{
+		visit[i]=false;        //初始化
+	}
+	for(i=0;i<G->numV;i++)
+	{
+		if(visit[i] == false)
+		{
+			DFS(G,i);
+		}
+	}
+}
+
+int main()
+{
+	int i,j;
+	ArrayGraph G;
+	CreatGraph(&G);
+	Print(&G); 
+	printf("The DFS result is:\n"); 
+	Travel_DFS(&G);
+}
