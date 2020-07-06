@@ -125,3 +125,88 @@ int main()
 	HuffmanCode(T,C,n);
 	ShowCode(T,C,n);
 }
+
+
+/****************
+另一种方式（只是将选择最小权值的部分单独写成一个函数。主要更改的地方就是对应的value取值） 
+#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 100
+#define MAXLEAF 2*MAXN-1
+#define MAXVALUE 10000
+
+typedef struct Tree{
+	char name;
+	int parent;
+	int lchild,rchild;
+	int weight;
+	int value;
+}HuffNode;
+typedef struct Code{
+	char name;
+	int start;
+	int bit[MAXN];
+}HuffCode;
+
+int select(HuffNode T[],int n,int *node1,int *node2)
+{
+	int i;
+	int min1,min2;
+	min1 = min2 = MAXVALUE;
+	*node1 = *node2 = 0;
+	for(i=0;i<n;i++)
+	{
+		if(T[i].parent == -1)
+		{
+			if(T[i].weight < min1)
+			{
+				min2 = min1;
+				*node2 = *node1;
+				min1 = T[i].weight;
+				*node1 = i;
+			}
+			else if(T[i].weight < min2)
+			{
+				min2 = T[i].weight;
+				*node2 = i;
+			}
+		}
+	}
+}
+
+int HuffmanTree(HuffNode T[],int n)
+{
+	int i;
+	char na;
+	int wei;
+	int node1,node2;
+	node1 = node2 = 0;
+	
+	
+	for(i=0;i<n;i++)
+	{
+		T[i].weight = 0;
+		T[i].name = '#';
+		T[i].parent = -1;
+		T[i].lchild = -1;
+		T[i].rchild = -1;
+		T[i].value = 0;
+	}
+	for(i=0;i<n;i++)
+	{
+		printf("Please input the %d node:name,weight\n",i+1);
+		scanf("%c,%d",&na,&wei);
+		T[i].weight = wei;
+		T[i].name = na;
+	}
+	for(i=n;i<2*n-1;i++)
+	{
+		select(T,i,&node1,&node2);
+		T[node1].parent = T[node2].parent = i;
+		T[i].lchild = node1;
+		T[i].rchild = node2;
+		T[i].weight = T[node1].weight + T[node2].weight;
+		printf("The node %c(weight%d) and %c(weight%d) are in %d rolls!\n",T[node1].name,T[node1].weight,T[node2].name,T[node2].weight,i-n+1);
+	}
+}
+****************/
